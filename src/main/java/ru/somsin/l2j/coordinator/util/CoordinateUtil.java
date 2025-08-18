@@ -1,13 +1,15 @@
-package ru.somsin.l2j.coordinator;
+package ru.somsin.l2j.coordinator.util;
+
+import ru.somsin.l2j.coordinator.model.Coordinate;
 
 import java.util.List;
 import java.util.ArrayList;
 
-public class CoordinateUtils {
+public class CoordinateUtil {
     
     public static double distance(Coordinate p1, Coordinate p2) {
-        double dx = p2.getX() - p1.getX();
-        double dy = p2.getY() - p1.getY();
+        int dx = p2.getX() - p1.getX();
+        int dy = p2.getY() - p1.getY();
         return Math.sqrt(dx * dx + dy * dy);
     }
     
@@ -60,8 +62,8 @@ public class CoordinateUtils {
     }
     
     public static Coordinate getRectangleCenter(Coordinate topLeft, Coordinate bottomRight) {
-        double centerX = (topLeft.getX() + bottomRight.getX()) / 2.0;
-        double centerY = (topLeft.getY() + bottomRight.getY()) / 2.0;
-        return new Coordinate(centerX, centerY);
+        int centerX = (topLeft.getX() + bottomRight.getX()) / 2;
+        int centerY = (topLeft.getY() + bottomRight.getY()) / 2;
+        return new Coordinate(centerX, centerY, topLeft.getZ());
     }
 }

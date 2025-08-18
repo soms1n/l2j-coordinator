@@ -1,13 +1,17 @@
 package ru.somsin.l2j.coordinator;
 
+import ru.somsin.l2j.coordinator.builder.RectangleBuilder;
+import ru.somsin.l2j.coordinator.model.Coordinate;
+import ru.somsin.l2j.coordinator.util.CoordinateUtil;
+
 import java.util.List;
 
 public class Application {
     public static void main(String[] args) {
         System.out.println("=== Построение прямоугольника ===");
         
-        Coordinate point1 = new Coordinate(0, 0);
-        Coordinate point2 = new Coordinate(100, 50);
+        Coordinate point1 = new Coordinate(0, 0,3);
+        Coordinate point2 = new Coordinate(100, 50, 3);
         
         System.out.println("Точка 1: " + point1);
         System.out.println("Точка 2: " + point2);
@@ -42,27 +46,27 @@ public class Application {
         
         System.out.println("\n=== Утилиты для работы с координатами ===");
         
-        Coordinate center = CoordinateUtils.getRectangleCenter(point1, point2);
+        Coordinate center = CoordinateUtil.getRectangleCenter(point1, point2);
         System.out.println("Центр прямоугольника: " + center);
         
-        Coordinate nearest = CoordinateUtils.findNearest(center, columns);
+        Coordinate nearest = CoordinateUtil.findNearest(center, columns);
         System.out.println("Ближайшая точка к центру: " + nearest);
         
-        double distance = CoordinateUtils.distance(center, nearest);
+        double distance = CoordinateUtil.distance(center, nearest);
         System.out.printf("Расстояние от центра до ближайшей точки: %.2f%n", distance);
         
-        List<Coordinate> nearbyPoints = CoordinateUtils.filterByRadius(center, 30.0, columns);
+        List<Coordinate> nearbyPoints = CoordinateUtil.filterByRadius(center, 30.0, columns);
         System.out.println("Точки в радиусе 30 от центра: " + nearbyPoints.size());
         
-        List<Coordinate> sortedPoints = CoordinateUtils.sortByDistance(center, columns);
+        List<Coordinate> sortedPoints = CoordinateUtil.sortByDistance(center, columns);
         System.out.println("Первые 3 ближайшие точки к центру:");
         for (int i = 0; i < Math.min(3, sortedPoints.size()); i++) {
             Coordinate coord = sortedPoints.get(i);
-            double dist = CoordinateUtils.distance(center, coord);
+            double dist = CoordinateUtil.distance(center, coord);
             System.out.printf("  %s (расстояние: %.2f)%n", coord, dist);
         }
         
-        boolean inside = CoordinateUtils.isInsideRectangle(center, point1, point2);
+        boolean inside = CoordinateUtil.isInsideRectangle(center, point1, point2);
         System.out.println("Центр находится внутри прямоугольника: " + inside);
     }
 }
