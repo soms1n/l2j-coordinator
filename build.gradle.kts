@@ -1,14 +1,14 @@
 plugins {
-    java
     application
+    java
 }
 
-group = "ru.somsin"
+group = "ru.somsin.l2j.coordiantor"
 version = "1.0-SNAPSHOT"
 description = "L2J Coordinator - Rectangle Building Library"
 
 application {
-    mainClass = "ru.somsin.l2j.coordinator.Application"
+    mainClass.set("ru.somsin.l2j.coordinator.Application")
 }
 
 repositories {

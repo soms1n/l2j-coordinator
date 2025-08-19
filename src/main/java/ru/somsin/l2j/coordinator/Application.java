@@ -1,72 +1,83 @@
 package ru.somsin.l2j.coordinator;
 
-import ru.somsin.l2j.coordinator.builder.RectangleBuilder;
 import ru.somsin.l2j.coordinator.model.Coordinate;
-import ru.somsin.l2j.coordinator.util.CoordinateUtil;
+import ru.somsin.l2j.coordinator.model.RectangleInput;
+import ru.somsin.l2j.coordinator.service.CoordinateService;
+import ru.somsin.l2j.coordinator.service.InputService;
+import ru.somsin.l2j.coordinator.service.OutputService;
+import ru.somsin.l2j.coordinator.util.DebugUtil;
 
+import java.util.Arrays;
 import java.util.List;
 
+import static ru.somsin.l2j.coordinator.util.DebugUtil.debug;
+import static ru.somsin.l2j.coordinator.util.DebugUtil.error;
+import static ru.somsin.l2j.coordinator.util.DebugUtil.info;
+
+/**
+ * Главный класс приложения L2J Coordinator.
+ * Координирует работу сервисов для построения координат прямоугольника.
+ */
 public class Application {
+
+    private final InputService inputService;
+    private final CoordinateService coordinateService;
+    private final OutputService outputService;
+
+    /**
+     * Конструктор приложения.
+     *
+     * @param inputService      сервис для чтения входных данных
+     * @param coordinateService сервис для построения координат
+     * @param outputService     сервис для вывода результатов
+     */
+    public Application(InputService inputService, CoordinateService coordinateService, OutputService outputService) {
+        this.inputService = inputService;
+        this.coordinateService = coordinateService;
+        this.outputService = outputService;
+        debug("Application initialized with services");
+    }
+
+    /**
+     * Запускает основную логику приложения.
+     * Читает входные данные, строит координаты прямоугольника и выводит результат.
+     */
+    public void run() {
+        info("Starting L2J Coordinator application");
+
+        try {
+            RectangleInput input = inputService.readRectangleInput();
+            List<Coordinate> coordinates = coordinateService.buildRectangleCoordinates(input);
+            outputService.outputJson(coordinates);
+            debug("Application completed successfully");
+        } catch (Exception exception) {
+            error("Error occurred during application execution: %s", exception);
+        } finally {
+            inputService.close();
+            debug("InputService closed");
+        }
+    }
+
+    /**
+     * Точка входа в приложение.
+     * Инициализирует сервисы и запускает приложение.
+     *
+     * @param args аргументы командной строки (--debug для включения режима отладки)
+     */
     public static void main(String[] args) {
-        System.out.println("=== Построение прямоугольника ===");
-        
-        Coordinate point1 = new Coordinate(0, 0,3);
-        Coordinate point2 = new Coordinate(100, 50, 3);
-        
-        System.out.println("Точка 1: " + point1);
-        System.out.println("Точка 2: " + point2);
-        
-        int rows = 3;
-        int columnsPerRow = 4;
-        
-        System.out.println("\nСтроим прямоугольник:");
-        System.out.println("Строк: " + rows);
-        System.out.println("Столбцов в строке: " + columnsPerRow);
-        
-        List<Coordinate> columns = RectangleBuilder.buildRectangle(point1, point2, rows, columnsPerRow);
-        
-        System.out.println("\nКоординаты столбцов:");
-        for (int i = 0; i < columns.size(); i++) {
-            Coordinate coord = columns.get(i);
-            int row = i / columnsPerRow;
-            int col = i % columnsPerRow;
-            System.out.printf("Строка %d, Столбец %d: %s%n", row + 1, col + 1, coord);
+        debug("Initializing L2J Coordinator");
+
+        boolean debugMode = Arrays.asList(args).contains("--debug");
+        if (debugMode) {
+            DebugUtil.setDebugMode(true);
+            debug("Debug mode enabled");
         }
-        
-        System.out.println("\n=== Равномерное распределение ===");
-        int totalColumns = 12;
-        List<Coordinate> uniformColumns = RectangleBuilder.buildRectangleUniform(point1, point2, rows, totalColumns);
-        
-        System.out.println("Общее количество столбцов: " + totalColumns);
-        System.out.println("Координаты столбцов:");
-        for (int i = 0; i < uniformColumns.size(); i++) {
-            Coordinate coord = uniformColumns.get(i);
-            System.out.printf("Столбец %d: %s%n", i + 1, coord);
-        }
-        
-        System.out.println("\n=== Утилиты для работы с координатами ===");
-        
-        Coordinate center = CoordinateUtil.getRectangleCenter(point1, point2);
-        System.out.println("Центр прямоугольника: " + center);
-        
-        Coordinate nearest = CoordinateUtil.findNearest(center, columns);
-        System.out.println("Ближайшая точка к центру: " + nearest);
-        
-        double distance = CoordinateUtil.distance(center, nearest);
-        System.out.printf("Расстояние от центра до ближайшей точки: %.2f%n", distance);
-        
-        List<Coordinate> nearbyPoints = CoordinateUtil.filterByRadius(center, 30.0, columns);
-        System.out.println("Точки в радиусе 30 от центра: " + nearbyPoints.size());
-        
-        List<Coordinate> sortedPoints = CoordinateUtil.sortByDistance(center, columns);
-        System.out.println("Первые 3 ближайшие точки к центру:");
-        for (int i = 0; i < Math.min(3, sortedPoints.size()); i++) {
-            Coordinate coord = sortedPoints.get(i);
-            double dist = CoordinateUtil.distance(center, coord);
-            System.out.printf("  %s (расстояние: %.2f)%n", coord, dist);
-        }
-        
-        boolean inside = CoordinateUtil.isInsideRectangle(center, point1, point2);
-        System.out.println("Центр находится внутри прямоугольника: " + inside);
+
+        InputService inputService = new InputService();
+        CoordinateService coordinateService = new CoordinateService();
+        OutputService outputService = new OutputService();
+
+        Application application = new Application(inputService, coordinateService, outputService);
+        application.run();
     }
 }
